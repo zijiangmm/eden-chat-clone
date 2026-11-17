@@ -1,0 +1,516 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<title>EdenChat | AI Character Chat</title>
+<meta name="description" content="Create your own character and enjoy AI conversations across every genre. Unlimited tokens, free forever.">
+<link rel="manifest" href="data:application/json,{%22name%22:%22EdenChat%20Clone%22,%22short_name%22:%22EdenChat%22,%22start_url%22:%22.%22,%22display%22:%22standalone%22,%22background_color%22:%22%230a0a0a%22,%22theme_color%22:%22%230a0a0a%22}">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{--bg:#0a0a0a;--card:#141414;--border:#222;--fg:#e8e8e8;--muted:#888;--accent:#e8b4b8;--safe-badge:#4ade80}
+[data-theme=light]{--bg:#f5f5f5;--card:#fff;--border:#e0e0e0;--fg:#1a1a1a;--muted:#666;--accent:#c97b80;--safe-badge:#22c55e}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--fg);min-height:100vh;display:flex;flex-direction:column;-webkit-font-smoothing:antialiased}
+a{color:inherit;text-decoration:none}
+button{cursor:pointer;border:none;font-family:inherit}
+input,textarea{font-family:inherit}
+
+/* Header */
+header{position:sticky;top:0;z-index:100;background:rgba(10,10,10,0.85);backdrop-filter:blur(12px);-webkit-backdrop-filter:blur(12px);border-bottom:1px solid var(--border)}
+.header-inner{max-width:1200px;margin:auto;padding:0 16px;height:56px;display:flex;align-items:center;justify-content:space-between}
+.logo{display:flex;align-items:center;gap:8px;font-weight:700;font-size:18px}
+.logo-icon{width:32px;height:32px;border-radius:8px;background:var(--accent);color:#000;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold}
+.nav-btns{display:flex;align-items:center;gap:8px}
+.nav-btns button{padding:6px 14px;border-radius:20px;font-size:13px;background:var(--card);color:var(--fg);border:1px solid var(--border)}
+.icon-btn{width:36px;height:36px;border-radius:50%;background:var(--card);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;color:var(--fg)}
+
+/* Hero */
+.hero{text-align:center;padding:40px 16px 24px}
+.hero h1{font-size:clamp(22px,5vw,32px);font-weight:800;margin-bottom:8px;background:linear-gradient(135deg,var(--accent),#c084fc,#f472b6);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:var(--muted);font-size:14px;margin-bottom:16px}
+.unlimited-banner{display:inline-flex;align-items:center;gap:8px;padding:8px 20px;border-radius:30px;font-size:13px;font-weight:600;background:rgba(74,222,128,0.12);color:#4ade80;border:1px solid rgba(74,222,128,0.25)}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:.6}} .pulse{animation:pulse 2s infinite}
+
+/* Categories */
+.cat-bar{max-width:1200px;margin:0 auto 16px;padding:0 16px;display:flex;gap:6px;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none}
+.cat-bar::-webkit-scrollbar{display:none}
+.cat-btn{padding:6px 14px;border-radius:20px;font-size:12px;font-weight:600;white-space:nowrap;background:var(--card);color:var(--muted);border:1px solid var(--border);transition:all .2s}
+.cat-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+
+/* Sort bar */
+.sort-bar{max-width:1200px;margin:0 auto 16px;padding:0 16px;display:flex;gap:6px}
+.sort-btn{padding:4px 12px;border-radius:14px;font-size:11px;background:transparent;color:var(--muted);border:1px solid var(--border)}
+.sort-btn.active{background:var(--accent);color:#000;border-color:var(--accent)}
+
+/* Grid */
+.main-content{flex:1;max-width:1200px;margin:auto;width:100%;padding:0 16px 24px}
+.section-title{font-size:16px;font-weight:700;margin-bottom:12px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:12px}
+
+/* Card */
+.card{background:var(--card);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:transform .2s,box-shadow .2s;cursor:pointer}
+.card:active{transform:scale(.98)}
+.card-cover{height:160px;background:linear-gradient(135deg,#667eea,#764ba2);display:flex;align-items:center;justify-content:center;font-size:48px;font-weight:800;color:rgba(255,255,255,.3);position:relative}
+.card-body{padding:12px}
+.card-name{font-size:14px;font-weight:700;margin-bottom:4px;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-desc{font-size:12px;color:var(--muted);margin-bottom:8px;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.card-meta{display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--muted)}
+.card-badges{display:flex;gap:4px}
+.safe-badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--safe-badge);color:#000}
+.official-badge{font-size:9px;font-weight:800;padding:2px 6px;border-radius:4px;background:var(--accent);color:#000}
+.card-author{font-size:11px;color:var(--muted)}
+
+/* Trending */
+.trending{margin-top:24px}
+.trending-list{display:flex;gap:10px;overflow-x:auto;-webkit-overflow-scrolling:touch;padding-bottom:8px}
+.trending-item{flex-shrink:0;width:150px;background:var(--card);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.trending-cover{height:90px;background:linear-gradient(135deg,#f472b6,#c084fc);display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;color:rgba(255,255,255,.3)}
+.trending-body{padding:8px}
+.trending-name{font-size:12px;font-weight:600;line-height:1.3;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.trending-views{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* Footer */
+footer{border-top:1px solid var(--border);padding:24px 16px;text-align:center}
+.footer-links{display:flex;justify-content:center;gap:16px;margin-bottom:12px;flex-wrap:wrap}
+.footer-links a{font-size:12px;color:var(--muted)}
+.footer-copy{font-size:11px;color:var(--muted);line-height:1.6}
+
+/* Chat Overlay */
+.chat-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;transform:translateX(100%);transition:transform .3s ease}
+.chat-overlay.open{transform:translateX(0)}
+.chat-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--card);flex-shrink:0}
+.chat-back{width:32px;height:32px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:18px;color:var(--fg)}
+.chat-title{flex:1;min-width:0}
+.chat-title h3{font-size:15px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.chat-title p{font-size:11px;color:var(--muted)}
+.chat-clear{padding:4px 12px;border-radius:12px;font-size:11px;background:var(--border);color:var(--fg)}
+.chat-messages{flex:1;overflow-y:auto;padding:16px;display:flex;flex-direction:column;gap:12px;-webkit-overflow-scrolling:touch}
+.chat-welcome{text-align:center;padding:40px 16px;color:var(--muted)}
+.chat-welcome h3{font-size:18px;font-weight:700;color:var(--fg);margin-bottom:8px}
+.msg-user{align-self:flex-end;max-width:80%;padding:10px 14px;border-radius:18px 18px 4px 18px;background:var(--accent);color:#000;font-size:14px;line-height:1.5}
+.msg-ai{align-self:flex-start;max-width:80%;padding:10px 14px;border-radius:18px 18px 18px 4px;background:var(--card);border:1px solid var(--border);font-size:14px;line-height:1.5}
+.typing{align-self:flex-start;display:flex;gap:4px;padding:10px 14px;background:var(--card);border:1px solid var(--border);border-radius:18px 18px 18px 4px}
+.typing span{width:8px;height:8px;border-radius:50%;background:var(--muted);animation:bounce 1.4s infinite both}
+.typing span:nth-child(2){animation-delay:.2s}.typing span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,80%,100%{transform:scale(.6)}40%{transform:scale(1)}}
+.token-bar{padding:8px 16px;text-align:center;font-size:11px;font-weight:600;background:rgba(74,222,128,0.1);color:#4ade80;border-top:1px solid rgba(74,222,128,.2);flex-shrink:0}
+.chat-input-area{display:flex;gap:8px;padding:12px 16px;border-top:1px solid var(--border);background:var(--card);flex-shrink:0}
+.chat-input{flex:1;padding:10px 16px;border-radius:24px;border:1px solid var(--border);background:var(--bg);color:var(--fg);font-size:14px;outline:none}
+.chat-send{width:44px;height:44px;border-radius:50%;background:var(--accent);color:#000;font-size:18px;font-weight:700;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.chat-send:disabled{opacity:.4}
+
+/* Search Overlay */
+.search-overlay{position:fixed;top:0;left:0;right:0;bottom:0;z-index:200;background:var(--bg);display:flex;flex-direction:column;transform:translateY(-100%);transition:transform .3s ease}
+.search-overlay.open{transform:translateY(0)}
+.search-header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--border)}
+.search-input{flex:1;padding:10px 16px;border-radius:24px;border:1px solid var(--border);background:var(--card);color:var(--fg);font-size:14px;outline:none}
+.search-results{flex:1;overflow-y:auto;padding:16px}
+
+/* Load more */
+.load-more{text-align:center;padding:16px}
+.load-more button{padding:10px 32px;border-radius:24px;font-size:13px;font-weight:600;background:var(--accent);color:#000}
+
+/* Responsive */
+@media(max-width:640px){
+  .grid{grid-template-columns:1fr}
+  .hero{padding:28px 12px 16px}
+  .cat-bar{padding:0 12px}
+  .main-content{padding:0 12px 16px}
+}
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<header>
+  <div class="header-inner">
+    <a href="#" class="logo" onclick="closeAll()"><div class="logo-icon">E</div><span>Eden</span></a>
+    <div class="nav-btns">
+      <button onclick="alert('EdenChat Clone v1.0\n\n✨ UNLIMITED TOKENS\n📱 PWA Ready\n💬 All Features Unlocked')">Get started</button>
+      <button class="icon-btn" onclick="toggleSearch()" title="Search">🔍</button>
+      <button class="icon-btn" onclick="toggleTheme()" title="Theme">🌓</button>
+      <button class="icon-btn" onclick="toggleBlur()" title="Image Blur">👁️‍🗨️</button>
+    </div>
+  </div>
+</header>
+
+<!-- Main -->
+<main class="main-content" id="mainContent">
+  <!-- Hero -->
+  <section class="hero">
+    <h1>EdenChat — AI Character Chat Platform</h1>
+    <p>Create your own character and enjoy AI conversations across every genre.</p>
+    <div class="unlimited-banner"><span class="pulse">✨</span> UNLIMITED TOKENS — Free Forever — No Sign-in Required</div>
+  </section>
+
+  <!-- Categories -->
+  <nav class="cat-bar" id="catBar"></nav>
+
+  <!-- Sort -->
+  <div class="sort-bar" id="sortBar"></div>
+
+  <!-- Works Grid -->
+  <section id="worksSection">
+    <h2 class="section-title" id="sectionTitle">All Works</h2>
+    <div class="grid" id="worksGrid"></div>
+    <div class="load-more"><button onclick="loadMore()">Load More →</button></div>
+  </section>
+
+  <!-- Trending -->
+  <section class="trending">
+    <h2 class="section-title">The hottest right now 🔥</h2>
+    <div class="trending-list" id="trendingList"></div>
+  </section>
+</main>
+
+<!-- Footer -->
+<footer>
+  <div class="footer-links">
+    <a href="#">Terms of Service</a>
+    <a href="#">Privacy Policy</a>
+    <a href="#">Content Guidelines</a>
+    <a href="#">Help Center</a>
+  </div>
+  <div class="footer-copy">
+    <p>EdenChat Clone — Unlimited AI Character Chat</p>
+    <p>© Eden Creative Studio Clone, All Rights Reserved.</p>
+    <p style="margin-top:4px;font-size:10px;opacity:.6">This is a clone for personal use. All original content belongs to Eden Creative Studio US Inc.</p>
+  </div>
+</footer>
+
+<!-- Chat Overlay -->
+<div class="chat-overlay" id="chatOverlay">
+  <div class="chat-header">
+    <button class="chat-back" onclick="closeChat()">←</button>
+    <div class="chat-title">
+      <h3 id="chatWorkName">Character Name</h3>
+      <p id="chatAuthor">by Author</p>
+    </div>
+    <button class="chat-clear" onclick="clearChat()">Clear</button>
+  </div>
+  <div class="chat-messages" id="chatMessages">
+    <div class="chat-welcome">
+      <h3>💬 Start chatting!</h3>
+      <p>Type a message below to begin your conversation.</p>
+      <p style="margin-top:8px;font-size:12px">Unlimited tokens • No restrictions</p>
+    </div>
+  </div>
+  <div class="token-bar">✨ UNLIMITED TOKENS — No restrictions | ∞ remaining</div>
+  <div class="chat-input-area">
+    <input class="chat-input" id="chatInput" type="text" placeholder="Type your message..." onkeydown="if(event.key==='Enter')sendMsg()">
+    <button class="chat-send" id="chatSendBtn" onclick="sendMsg()">➤</button>
+  </div>
+</div>
+
+<!-- Search Overlay -->
+<div class="search-overlay" id="searchOverlay">
+  <div class="search-header">
+    <button class="chat-back" onclick="toggleSearch()">←</button>
+    <input class="search-input" id="searchInput" type="text" placeholder="Search works..." oninput="doSearch()">
+  </div>
+  <div class="search-results" id="searchResults"></div>
+</div>
+
+<script>
+// ========== DATA ==========
+const CATEGORIES = ['All Works','New','Ranking','Following','Bookmarks',
+  'Simulation','Romance','Fantasy/Sci-Fi','Drama','Wuxia/Historical',
+  'Horror/Mystery','Action','Comedy/Slice of Life','Sports/School','BL','GL','Other'];
+
+const WORKS = [
+  {id:'w1',name:'𝔼ℕ 𝔾𝔸ℝ𝔻𝔼 ― 𝐓𝐡𝐞 𝐒𝐰𝐨𝐫𝐝 𝐌𝐚𝐢𝐝𝐞𝐧 𝐍𝐞𝐯𝐞𝐫 𝐒𝐦𝐢𝐥𝐞𝐬 𝐚𝐭 𝐌𝐞',desc:'Her blade is cold, but is her heart too?',category:'Fantasy/Sci-Fi',author:'FantasyMaster',chapters:35,likes:150,views:30000,safe:true,official:false,tags:['fantasy','action','romance'],gradient:'#667eea,#764ba2'},
+  {id:'w2',name:'The perfect prince is actually a busty beautiful girl?',desc:'"Your Highness"... wait, what?!',category:'Romance',author:'GenderBenderFan',chapters:28,likes:135,views:28000,safe:true,official:false,tags:['romance','comedy','genderbender'],gradient:'#f093fb,#f5576c'},
+  {id:'w3',name:'Picking Up a High School Girl on a Rainy Day.',desc:'[🖼️161 👤5 ♀️3 ♂️2]',category:'Romance',author:'도랑물Official',chapters:5,likes:5,views:25800,safe:true,official:true,tags:['romance','slice of life','drama'],gradient:'#4facfe,#00f2fe'},
+  {id:'w4',name:'One Day I Became a Villainess',desc:"I opened my eyes and realized... I'm the villainess?!",category:'Drama',author:'VillainessLover',chapters:50,likes:120,views:25000,safe:true,official:false,tags:['drama','villainess','isekai'],gradient:'#fa709a,#fee140'},
+  {id:'w5',name:'Delboa Magic High School',desc:'[🖼️750+ ♀30 ♂10] JSX Update!!',category:'Fantasy/Sci-Fi',author:'deolbo',chapters:48,likes:48,views:22500,safe:true,official:false,tags:['magic','school','fantasy'],gradient:'#a18cd1,#fbc2eb'},
+  {id:'w6',name:'May you find a love as vast as the universe embracing the moon.',desc:'Under the moonlight, our destinies intertwined...',category:'Romance',author:'CosmicRomance',chapters:22,likes:110,views:22000,safe:true,official:false,tags:['romance','cosmic','poetic'],gradient:'#ffecd2,#fcb69f'},
+  {id:'w7',name:'My Master Is Already Dead',desc:"Master's last words echo in your mind...",category:'Wuxia/Historical',author:'WuxiaMaster',chapters:45,likes:98,views:19000,safe:true,official:false,tags:['wuxia','martial arts','revenge'],gradient:'#89f7fe,#66a6ff'},
+  {id:'w8',name:'Dungeon Explorers',desc:'The dungeon gate creaks open...',category:'Action',author:'DungeonMaster',chapters:40,likes:95,views:18000,safe:true,official:false,tags:['dungeon','adventure','rpg'],gradient:'#f6d365,#fda085'},
+  {id:'w9',name:'Last Loop (Safety)',desc:'Loop count: 147. This time will be different.',category:'Fantasy/Sci-Fi',author:'LoopBreaker',chapters:17,likes:72,views:16000,safe:true,official:false,tags:['timeloop','fantasy','psychological'],gradient:'#a1c4fd,#c2e9fb'},
+  {id:'w10',name:'House of Tomorrow',desc:'The door to tomorrow opens before you...',category:'Fantasy/Sci-Fi',author:'SciFiWriter',chapters:30,likes:89,views:15000,safe:true,official:false,tags:['scifi','future','slice of life'],gradient:'#d299c2,#fef9d7'},
+  {id:'w11',name:'I Got a Fake Confession from the Bullied Class Beauty',desc:'She confessed... but was it real?',category:'Romance',author:'RomanceKing',chapters:60,likes:200,views:45000,safe:true,official:false,tags:['romance','school','drama'],gradient:'#f5576c,#f093fb'},
+  {id:'w12',name:'Midnight Stroll Through the Haunted Mansion',desc:'Every creak tells a story of the departed...',category:'Horror/Mystery',author:'GhostWriter',chapters:25,likes:88,views:14000,safe:true,official:false,tags:['horror','ghost','mystery'],gradient:'#0c0c0c,#434343'},
+  {id:'w13',name:'The Demon King\'s Secretary',desc:'Managing the demon king\'s schedule is harder than conquering the world.',category:'Comedy/Slice of Life',author:'ComedyQueen',chapters:33,likes:105,views:17000,safe:true,official:false,tags:['comedy','fantasy','office'],gradient:'#f7971e','#ffd200'},
+  {id:'w14',name:'Blade & Blossom Academy',desc:'Where swordsmanship meets elegance.',category:'Sports/School',author:'SchoolLifePro',chapters:42,likes:92,views:15500,safe:true,official:false,tags:['school','sports','academy'],gradient:'#11998e','#38ef7d'},
+  {id:'w15',name:'Whispers in the Dark',desc:'Two souls bound by fate, torn by society.',category:'BL',author:'BLMaster',chapters:38,likes:180,views:35000,safe:true,official:false,tags:['BL','romance','drama'],gradient:'#8E2DE2','#4A00E0'},
+  {id:'w16',name:'Garden of Moonlit Petals',desc:'In this garden, love blooms differently.',category:'GL',author:'GLWriter',chapters:27,likes:145,views:28000,safe:true,official:false,tags:['GL','romance','poetry'],gradient:'#ee9ca7,'#ffdde1'},
+  {id:'w17',name:'The Last Stand of Humanity',desc:'When all hope fades, heroes rise.',category:'Action',author:'ActionHero',chapters:55,likes:165,views:32000,safe:true,official:false,tags:['action','apocalypse','mecha'],gradient:'#eb3349','#f45c43'},
+  {id:'w18',name:'Coffee Shop at the Edge of the World',desc:'A warm cup, a quiet corner, infinite stories.',category:'Slice of Life',author:'CozyWriter',chapters:20,likes:78,views:12000,safe:true,official:false,tags:['slice of life','cozy','healing'],gradient:'#d4fc79','#96e6a1'},
+];
+
+const AI_RESPONSES = {
+  romantic:[
+    "*blushes softly* Y-you really feel that way? My heart is beating so fast right now...",
+    "*looks away shyly* I... I've never had anyone say something like that to me before...",
+    "*gently takes your hand* Stay with me... just a little longer.",
+    "*whispers* Every moment with you feels like a dream I never want to wake from...",
+  ],
+  dramatic:[
+    "*eyes darken* You have no idea what I've been through... what I've sacrificed...",
+    "*clenches fist* This world took everything from me. But I won't let it take you too.",
+    "*voice trembling* I thought I was alone... until you came into my life.",
+    "*turns away* Some stories are better left untold. But for you... I'll make an exception.",
+  ],
+  action:[
+    "*draws weapon* Stand behind me. I'll handle this.",
+    "*grins fiercely* You think that's enough to stop us? Let's show them what we're made of!",
+    "*breathing heavily* That was close... but we made it. Together.",
+    "*eyes burning with determination* I won't lose. Not now. Not ever.",
+  ],
+  default:[
+    "*smiles warmly* That's interesting! Tell me more about yourself~",
+    "*nods thoughtfully* I see... You have such fascinating ideas!",
+    "*leans in curiously* Oh? Now you've caught my attention~",
+    "*laughs softly* You're quite different from others, aren't you? I like that~",
+    "*tilts head* Hmm, let me think about that for a moment...",
+  ]
+};
+
+// ========== STATE ==========
+let currentCat = 'All Works';
+let currentSort = 'new';
+let displayedCount = 6;
+let currentWork = null;
+let chatHistory = [];
+let bookmarks = [];
+let imageBlur = false;
+
+// ========== INIT ==========
+function init() {
+  renderCats();
+  renderSorts();
+  renderWorks();
+  renderTrending();
+  
+  // Load saved state
+  const savedTheme = localStorage.getItem('eden-theme');
+  if(savedTheme) document.documentElement.setAttribute('data-theme',savedTheme);
+  const savedBmarks = localStorage.getItem('eden-bookmarks');
+  if(savedBmarks) bookmarks = JSON.parse(savedBmarks);
+}
+
+// ========== CATEGORIES ==========
+function renderCats() {
+  const bar = document.getElementById('catBar');
+  bar.innerHTML = CATEGORIES.map(c => 
+    `<button class="cat-btn${c===currentCat?' active':''}" onclick="setCat('${c}')">${c}</button>`
+  ).join('');
+}
+
+function setCat(cat) {
+  currentCat = cat;
+  displayedCount = 6;
+  renderCats();
+  renderWorks();
+}
+
+// ========== SORT ==========
+function renderSorts() {
+  const sorts = [
+    {key:'new',label:'New releases (real-time)'},
+    {key:'realtime',label:'realtime'},
+    {key:'daily',label:'daily'},
+    {key:'monthly',label:'monthly'},
+    {key:'all',label:'all'}
+  ];
+  document.getElementById('sortBar').innerHTML = sorts.map(s =>
+    `<button class="sort-btn${s.key===currentSort?' active':''}" onclick="setSort('${s.key}')">${s.label}</button>`
+  ).join('');
+}
+
+function setSort(s) { currentSort = s; renderSorts(); renderWorks(); }
+
+// ========== WORKS ==========
+function getFilteredWorks() {
+  let list = [...WORKS];
+  if(currentCat && currentCat !== 'All Works' && !['New','Ranking','Following','Bookmarks'].includes(currentCat)) {
+    list = list.filter(w => w.category === currentCat);
+  }
+  if(currentCat === 'Bookmarks') list = list.filter(w => bookmarks.includes(w.id));
+  // Sort
+  if(currentSort === 'all') return list;
+  return list.sort((a,b) => b.views - a.views);
+}
+
+function renderWorks() {
+  const filtered = getFilteredWorks();
+  const show = filtered.slice(0, displayedCount);
+  const title = document.getElementById('sectionTitle');
+  title.textContent = currentCat + ' (' + filtered.length + ')';
+  
+  document.getElementById('worksGrid').innerHTML = show.map(w => `
+    <div class="card" onclick="openChat(${JSON.stringify(w).replace(/"/g,'&quot;')})">
+      <div class="card-cover" style="background:linear-gradient(135deg,${w.gradient})">${w.name.charAt(0)}</div>
+      <div class="card-body">
+        <div style="display:flex;gap:4px;margin-bottom:6px;flex-wrap:wrap">
+          ${w.safe?'<span class="safe-badge">SAFE</span>':''}
+          ${w.official?'<span class="official-badge">Official</span>':''}
+        </div>
+        <div class="card-name">${w.name}</div>
+        <div class="card-desc">${w.desc}</div>
+        <div class="card-meta">
+          <span>${w.chapters}•${w.likes}•${fmtNum(w.views)}</span>
+          <span class="card-author">${w.author}</span>
+        </div>
+      </div>
+    </div>
+  `).join('');
+}
+
+function loadMore() { displayedCount += 3; renderWorks(); }
+
+// ========== TRENDING ==========
+function renderTrending() {
+  const top = [...WORKS].sort((a,b)=>b.views-a.views).slice(0,6);
+  document.getElementById('trendingList').innerHTML = top.map(w => `
+    <div class="trending-item" onclick="openChat(${JSON.stringify(w).replace(/"/g,'&quot;')})">
+      <div class="trending-cover" style="background:linear-gradient(135deg,${w.gradient})">${w.name.charAt(0)}</div>
+      <div class="trending-body">
+        <div class="trending-name">${w.name}</div>
+        <div class="trending-views">${fmtNum(w.views)} views</div>
+      </div>
+    </div>
+  `).join('');
+}
+
+// ========== CHAT ==========
+function openChat(work) {
+  currentWork = work;
+  chatHistory = [];
+  document.getElementById('chatWorkName').textContent = work.name;
+  document.getElementById('chatAuthor').textContent = 'by ' + work.author;
+  document.getElementById('chatMessages').innerHTML = `
+    <div class="chat-welcome">
+      <h3>💬 Start chatting!</h3>
+      <p>Start chatting with <strong>${work.name}</strong></p>
+      <p style="margin-top:8px;font-size:12px">Unlimited tokens • No restrictions</p>
+    </div>`;
+  document.getElementById('chatOverlay').classList.add('open');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeChat() {
+  document.getElementById('chatOverlay').classList.remove('open');
+  document.body.style.overflow = '';
+  currentWork = null;
+}
+
+function clearChat() {
+  chatHistory = [];
+  document.getElementById('chatMessages').innerHTML = `
+    <div class="chat-welcome">
+      <h3>💬 Chat cleared</h3>
+      <p>Start a fresh conversation~</p>
+    </div>`;
+}
+
+function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if(!text || !currentWork) return;
+  
+  const msgs = document.getElementById('chatMessages');
+  // Remove welcome if exists
+  const welcome = msgs.querySelector('.chat-welcome');
+  if(welcome) welcome.remove();
+  
+  // Add user msg
+  addMsg(text, 'user');
+  input.value = '';
+  
+  // Show typing
+  const typingEl = document.createElement('div');
+  typingEl.className = 'typing';
+  typingEl.id = 'typingIndicator';
+  typingEl.innerHTML = '<span></span><span></span><span></span>';
+  msgs.appendChild(typingEl);
+  scrollToBottom();
+  
+  // Generate AI response
+  setTimeout(() => {
+    const typing = document.getElementById('typingIndicator');
+    if(typing) typing.remove();
+    
+    const category = currentWork.category;
+    let pool = AI_RESPONSES.default;
+    if(category.includes('Romance')||category.includes('BL')||category.includes('GL')) pool = AI_RESPONSES.romantic;
+    else if(category.includes('Drama')||category.includes('Horror')) pool = AI_RESPONSES.dramatic;
+    else if(category.includes('Action')||category.includes('Wuxia')) pool = AI_RESPONSES.action;
+    
+    const reply = pool[Math.floor(Math.random()*pool.length)];
+    addMsg(reply, 'ai');
+  }, 1000 + Math.random()*1500);
+}
+
+function addMsg(text, type) {
+  const div = document.createElement('div');
+  div.className = type==='user'?'msg-user':'msg-ai';
+  div.textContent = text;
+  document.getElementById('chatMessages').appendChild(div);
+  scrollToBottom();
+  chatHistory.push({role:type==='user'?'user':'ai',content:text});
+}
+
+function scrollToBottom() {
+  const m = document.getElementById('chatMessages');
+  m.scrollTop = m.scrollHeight;
+}
+
+// ========== SEARCH ==========
+function toggleSearch() {
+  const o = document.getElementById('searchOverlay');
+  o.classList.toggle('open');
+  if(o.classList.contains('open')) {
+    document.getElementById('searchInput').focus();
+    document.body.style.overflow = 'hidden';
+  } else {
+    document.body.style.overflow = '';
+  }
+}
+
+function doSearch() {
+  const q = document.getElementById('searchInput').value.toLowerCase().trim();
+  if(!q) { document.getElementById('searchResults').innerHTML='<p style="color:var(--muted);text-align:center;padding:20px">Type to search...</p>'; return; }
+  const results = WORKS.filter(w => 
+    w.name.toLowerCase().includes(q)||w.author.toLowerCase().includes(q)||
+    w.tags.some(t=>t.includes(q))||w.desc.toLowerCase().includes(q)
+  );
+  document.getElementById('searchResults').innerHTML = results.length ? results.map(w => `
+    <div class="card" style="margin-bottom:10px" onclick="openChat(${JSON.stringify(w).replace(/"/g,'&quot;')});toggleSearch()">
+      <div class="card-cover" style="height:100px;background:linear-gradient(135deg,${w.gradient})">${w.name.charAt(0)}</div>
+      <div class="card-body">
+        <div class="card-name">${w.name}</div>
+        <div class="card-desc">${w.desc}</div>
+        <div class="card-meta"><span>${fmtNum(w.views)} views</span><span>${w.author}</span></div>
+      </div>
+    </div>
+  `).join('') : '<p style="color:var(--muted);text-align:center;padding:40px">No results found 😢</p>';
+}
+
+// ========== THEME ==========
+function toggleTheme() {
+  const html = document.documentElement;
+  const next = html.getAttribute('data-theme')==='dark'?'light':'dark';
+  html.setAttribute('data-theme',next);
+  localStorage.setItem('eden-theme',next);
+}
+
+// ========== BLUR ==========
+function toggleBlur() {
+  imageBlur = !imageBlur;
+  document.querySelectorAll('.card-cover,.trending-cover').forEach(el => {
+    el.style.filter = imageBlur ? 'blur(20px)' : '';
+  });
+}
+
+// ========== UTILS ==========
+function fmtNum(n) { if(n>=1000)return(n/1000).toFixed(0)+'K';return n; }
+function closeAll() { closeChat(); const s=document.getElementById('searchOverlay'); if(s.classList.contains('open'))toggleSearch(); }
+
+// Go!
+init();
+</script>
+</body>
+</html>
